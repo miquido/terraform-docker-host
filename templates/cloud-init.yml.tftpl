@@ -1,0 +1,52 @@
+#cloud-config
+users:
+  - name: dynamic
+    gecos: "Dynamic User"
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: sudo
+    shell: /bin/bash
+    lock_passwd: false
+    passwd: ${passwd}
+chpasswd:
+  expire: false
+
+write_files:
+  - path: /home/dynamic/docker-compose.yml
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      ${indent(6, docker_compose_content)}
+  - path: /home/dynamic/startup.sh
+    owner: 'root:root'
+    permissions: '0744'
+    content: |
+      ${indent(6, startup_sh_content)}
+  - path: /home/dynamic/nginx-static.conf
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      ${indent(6, nginx_static_content)}
+  - path: /home/dynamic/traefik-tls.yml
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      ${indent(6, traefik_tls_content)}
+
+runcmd:
+  - [ sh, -c, "until apt-get update; do sleep 30; done" ]
+  - [ apt-get, install, -y, ca-certificates, curl ]
+  - [ install, -m, "0755", -d, /etc/apt/keyrings ]
+  - [ sh, -c, "curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && chmod a+r /etc/apt/keyrings/docker.asc" ]
+  - [ sh, -c, "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable\" | tee /etc/apt/sources.list.d/docker.list > /dev/null" ]
+  - [ apt-get, update ]
+  - [ apt-get, install, -y, docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin ]
+  - [ /home/dynamic/startup.sh ]
+%{ if use_ecr_credential_helper ~}
+  - [ apt-get, install, -y, amazon-ecr-credential-helper ]
+  - [ sh, -c, "mkdir -p /root/.docker && echo '{\"credHelpers\":{\"${registry_url}\":\"ecr-login\"}}' > /root/.docker/config.json" ]
+%{ elif registry_url != "" ~}
+  - [ docker, login, ${registry_url}, -u, ${registry_username}, -p, ${registry_password} ]
+%{ endif ~}
+  - [ systemctl, enable, docker ]
+  - [ systemctl, start, docker ]
+  - [ docker, compose, -f, /home/dynamic/docker-compose.yml, up, -d ]

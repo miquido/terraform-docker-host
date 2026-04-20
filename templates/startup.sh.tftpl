@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+sudo mkdir /mnt/data
+
+while [ ! -b ${block_device} ]; do
+    echo "Waiting for ${block_device} to appear..."
+    sleep 2
+done
+
+if ! sudo blkid ${block_device}; then
+    echo "No filesystem found on ${block_device}, creating ext4 filesystem..."
+    sudo mkfs.ext4 ${block_device}
+fi
+
+EBS_UUID=$$(sudo blkid ${block_device} | awk -F'"' '{print $$2}')
+
+sudo mount ${block_device} /mnt/data
+
+echo "UUID=$${EBS_UUID} /mnt/data ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab

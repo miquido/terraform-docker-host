@@ -1,0 +1,78 @@
+networks:
+  traefik-net:
+    name: traefik-net
+
+services:
+  traefik:
+    image: traefik:v3
+    ports:
+      - "80:80"
+      - "443:443"
+      - "5432:5432"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/data/certs:/certs
+      - /home/dynamic/traefik-tls.yml:/etc/traefik/traefik-tls.yml:ro
+    environment:
+%{ for key, value in dns_challenge_env ~}
+      ${key}: "${value}"
+%{ endfor ~}
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=traefik-net"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=${dns_challenge_provider}"
+      - "--certificatesresolvers.letsencrypt.acme.email=${acme_email}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json"
+      - "--entrypoints.postgres.address=:5432"
+      - "--providers.file.filename=/etc/traefik/traefik-tls.yml"
+    restart: unless-stopped
+    networks:
+      - traefik-net
+
+  docker-compose-runner:
+    user: root
+    image: ${docker_compose_runner_image}
+    environment:
+      OIDC_JWKS_URL: ${oidc_jwks_url}
+      OIDC_AUDIENCE: ${oidc_audience}
+      OIDC_EXPECTED_SUBS: ${oidc_expected_subs}
+      STATIC_PATH: /data/static
+      DOCKER_COMPOSE_PATH: /mnt/data/compose
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.runner.rule=Host(`docker.${domain}`)"
+      - "traefik.http.routers.runner.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.runner.tls.domains[0].main=${domain}"
+      - "traefik.http.routers.runner.tls.domains[0].sans=*.${domain}"
+      - "traefik.http.routers.runner.middlewares=allowlist-office"
+      - "traefik.http.middlewares.allowlist-office.ipallowlist.sourcerange=${ip_allowlist}"
+      - "traefik.http.services.runner.loadbalancer.server.port=8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.docker/config.json:/root/.docker/config.json:ro
+      - /mnt/data/compose:/mnt/data/compose
+      - /mnt/data/static:/data/static
+    restart: unless-stopped
+    networks:
+      - traefik-net
+
+  nginx-static:
+    image: nginx:1.27-alpine
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.static.rule=HostRegexp(`[a-z0-9-]+\\.${domain_escaped}`)"
+      - "traefik.http.routers.static.tls=true"
+      - "traefik.http.routers.static.priority=1"
+      - "traefik.http.services.static.loadbalancer.server.port=80"
+    volumes:
+      - /home/dynamic/nginx-static.conf:/etc/nginx/conf.d/default.conf:ro
+      - /mnt/data/static:/data/static:ro
+    restart: unless-stopped
+    networks:
+      - traefik-net
