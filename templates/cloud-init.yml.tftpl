@@ -44,8 +44,10 @@ runcmd:
 %{ if use_ecr_credential_helper ~}
   - [ apt-get, install, -y, amazon-ecr-credential-helper ]
   - [ sh, -c, "mkdir -p /root/.docker && echo '{\"credHelpers\":{\"${registry_url}\":\"ecr-login\"}}' > /root/.docker/config.json" ]
-%{ elif registry_url != "" ~}
+%{ else ~}
+%{ if registry_url != "" ~}
   - [ docker, login, ${registry_url}, -u, ${registry_username}, -p, ${registry_password} ]
+%{ endif ~}
 %{ endif ~}
   - [ systemctl, enable, docker ]
   - [ systemctl, start, docker ]
