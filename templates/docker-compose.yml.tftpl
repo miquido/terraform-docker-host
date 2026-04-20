@@ -13,10 +13,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /mnt/data/certs:/certs
       - /home/dynamic/traefik-tls.yml:/etc/traefik/traefik-tls.yml:ro
+%{ if length(dns_challenge_env) > 0 ~}
     environment:
 %{ for key, value in dns_challenge_env ~}
       ${key}: "${value}"
 %{ endfor ~}
+%{ endif ~}
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"

@@ -2,6 +2,17 @@
 
 sudo mkdir /mnt/data
 
+# On NVMe-based instances (t3, m5, etc.) EBS volumes attached as /dev/xvdf
+# appear as /dev/nvme*n1 with no automatic symlink on Ubuntu. Create one if needed.
+if [ ! -b "${block_device}" ]; then
+    for dev in /dev/nvme[1-9]n1; do
+        if [ -b "$dev" ]; then
+            ln -sf "$dev" "${block_device}"
+            break
+        fi
+    done
+fi
+
 while [ ! -b ${block_device} ]; do
     echo "Waiting for ${block_device} to appear..."
     sleep 2
@@ -12,7 +23,7 @@ if ! sudo blkid ${block_device}; then
     sudo mkfs.ext4 ${block_device}
 fi
 
-EBS_UUID=$$(sudo blkid ${block_device} | awk -F'"' '{print $$2}')
+EBS_UUID=$(sudo blkid ${block_device} | awk -F'"' '{print $2}')
 
 sudo mount ${block_device} /mnt/data
 
