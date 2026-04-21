@@ -31,6 +31,17 @@ write_files:
     permissions: '0644'
     content: |
       ${indent(6, traefik_tls_content)}
+%{ if use_ecr_credential_helper ~}
+  - path: /root/.docker/ecr-refresh.sh
+    owner: 'root:root'
+    permissions: '0755'
+    content: |
+      #!/bin/sh
+      TOKEN=$(aws ecr get-login-password)
+      AUTH=$(printf 'AWS:%s' "$TOKEN" | base64 -w0)
+      mkdir -p /root/.docker
+      printf '{"auths":{"${registry_url}":{"auth":"%s"}}}\n' "$AUTH" > /root/.docker/config.json
+%{ endif ~}
 
 runcmd:
   - [ sh, -c, "until apt-get update; do sleep 30; done" ]
@@ -41,14 +52,9 @@ runcmd:
   - [ apt-get, update ]
   - [ apt-get, install, -y, docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin ]
   - [ /home/dynamic/startup.sh ]
-%{ if use_ecr_credential_helper ~}
-  - [ apt-get, install, -y, amazon-ecr-credential-helper ]
-  - [ sh, -c, "mkdir -p /root/.docker && echo '{\"credHelpers\":{\"${registry_url}\":\"ecr-login\"}}' > /root/.docker/config.json" ]
-%{ else ~}
-%{ if registry_url != "" ~}
-  - [ docker, login, ${registry_url}, -u, ${registry_username}, -p, ${registry_password} ]
-%{ endif ~}
-%{ endif ~}
   - [ systemctl, enable, docker ]
   - [ systemctl, start, docker ]
+%{ if !use_ecr_credential_helper && registry_url != "" ~}
+  - [ docker, login, ${registry_url}, -u, ${registry_username}, -p, ${registry_password} ]
+%{ endif ~}
   - [ docker, compose, -f, /home/dynamic/docker-compose.yml, up, -d ]

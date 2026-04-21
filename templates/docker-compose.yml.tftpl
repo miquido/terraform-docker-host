@@ -37,6 +37,20 @@ services:
     networks:
       - traefik-net
 
+%{ if use_ecr_credential_helper ~}
+  ecr-login:
+    image: amazon/aws-cli
+    entrypoint: /bin/sh
+    environment:
+      AWS_DEFAULT_REGION: ${split(".", registry_url)[3]}
+    command:
+      - -c
+      - "while true; do sh /root/.docker/ecr-refresh.sh; sleep 21600; done"
+    volumes:
+      - /root/.docker:/root/.docker
+    restart: unless-stopped
+
+%{ endif ~}
   docker-compose-runner:
     user: root
     image: ${docker_compose_runner_image}
@@ -57,7 +71,9 @@ services:
       - "traefik.http.services.runner.loadbalancer.server.port=8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /root/.docker/config.json:/root/.docker/config.json:ro
+%{ if use_ecr_credential_helper ~}
+      - /root/.docker:/root/.docker:ro
+%{ endif ~}
       - /mnt/data/compose:/mnt/data/compose
       - /mnt/data/static:/data/static
     restart: unless-stopped

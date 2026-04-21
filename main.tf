@@ -12,6 +12,8 @@ locals {
     oidc_expected_subs          = var.oidc_expected_subs
     ip_allowlist                = var.ip_allowlist
     docker_compose_runner_image = var.docker_compose_runner_image
+    registry_url                = var.registry_url
+    use_ecr_credential_helper   = var.use_ecr_credential_helper
   })
 
   startup_sh_content = templatefile("${path.module}/templates/startup.sh.tftpl", {
