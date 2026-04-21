@@ -57,7 +57,7 @@ services:
       - "traefik.http.services.runner.loadbalancer.server.port=8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ~/.docker/config.json:/root/.docker/config.json:ro
+      - /root/.docker/config.json:/root/.docker/config.json:ro
       - /mnt/data/compose:/mnt/data/compose
       - /mnt/data/static:/data/static
     restart: unless-stopped
