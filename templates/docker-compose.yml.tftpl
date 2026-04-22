@@ -73,6 +73,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 %{ if use_ecr_credential_helper ~}
       - /root/.docker:/root/.docker:ro
+%{ else ~}
+%{ if registry_url != "" ~}
+      - /root/.docker/config.json:/root/.docker/config.json:ro
+%{ endif ~}
 %{ endif ~}
 %{ if walg_s3_endpoint != "" ~}
       - /home/dynamic/walg.env:/home/dynamic/walg.env:ro
