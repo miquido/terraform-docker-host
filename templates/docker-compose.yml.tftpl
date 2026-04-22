@@ -74,6 +74,9 @@ services:
 %{ if use_ecr_credential_helper ~}
       - /root/.docker:/root/.docker:ro
 %{ endif ~}
+%{ if walg_s3_endpoint != "" ~}
+      - /home/dynamic/walg.env:/home/dynamic/walg.env:ro
+%{ endif ~}
       - /mnt/data/compose:/mnt/data/compose
       - /mnt/data/static:/data/static
     restart: unless-stopped

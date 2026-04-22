@@ -14,6 +14,7 @@ locals {
     docker_compose_runner_image = var.docker_compose_runner_image
     registry_url                = var.registry_url
     use_ecr_credential_helper   = var.use_ecr_credential_helper
+    walg_s3_endpoint            = var.walg_s3_endpoint
   })
 
   startup_sh_content = templatefile("${path.module}/templates/startup.sh.tftpl", {
@@ -26,6 +27,10 @@ locals {
     registry_username          = var.registry_username
     registry_password          = var.registry_password
     use_ecr_credential_helper  = var.use_ecr_credential_helper
+    walg_s3_endpoint           = var.walg_s3_endpoint
+    walg_s3_access_key_id      = var.walg_s3_access_key_id
+    walg_s3_secret_access_key  = var.walg_s3_secret_access_key
+    walg_s3_region             = var.walg_s3_region
     docker_compose_content     = local.docker_compose_content
     startup_sh_content         = local.startup_sh_content
     traefik_tls_content        = file("${path.module}/templates/traefik-tls.yml")
