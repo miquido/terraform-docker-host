@@ -83,25 +83,9 @@ variable "block_device" {
   default     = "/dev/sdb"
 }
 
-variable "walg_s3_endpoint" {
-  description = "WAL-G S3 endpoint URL. Empty = skip walg.env generation."
-  type        = string
-  default     = ""
-}
-
-variable "walg_s3_access_key_id" {
-  type      = string
-  default   = ""
-  sensitive = true
-}
-
-variable "walg_s3_secret_access_key" {
-  type      = string
-  default   = ""
-  sensitive = true
-}
-
-variable "walg_s3_region" {
-  type    = string
-  default = ""
+variable "walg_env_vars" {
+  description = "WAL-G environment variables written to /home/dynamic/walg.env. Empty map = skip file generation. Cloud-agnostic: pass whatever KEY=VALUE pairs your storage backend requires (AWS S3 IAM, S3-compatible endpoint, GCS, Azure Blob, etc.)."
+  type        = map(string)
+  default     = {}
+  sensitive   = true
 }

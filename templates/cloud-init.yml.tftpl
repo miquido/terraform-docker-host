@@ -31,18 +31,14 @@ write_files:
     permissions: '0644'
     content: |
       ${indent(6, traefik_tls_content)}
-%{ if walg_s3_endpoint != "" ~}
+%{ if length(walg_env_vars) > 0 ~}
   - path: /home/dynamic/walg.env
     owner: 'root:root'
     permissions: '0600'
     content: |
-      AWS_ENDPOINT=${walg_s3_endpoint}
-      AWS_ACCESS_KEY_ID=${walg_s3_access_key_id}
-      AWS_SECRET_ACCESS_KEY=${walg_s3_secret_access_key}
-      AWS_REGION=${walg_s3_region}
-      AWS_S3_FORCE_PATH_STYLE=true
-      WALG_COMPRESSION_METHOD=lz4
-      PGHOST=/var/run/postgresql
+%{ for key, value in walg_env_vars ~}
+      ${key}=${value}
+%{ endfor ~}
 %{ endif ~}
 %{ if use_ecr_credential_helper ~}
   - path: /root/.docker/ecr-refresh.sh

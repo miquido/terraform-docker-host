@@ -78,7 +78,7 @@ services:
       - /root/.docker/config.json:/root/.docker/config.json:ro
 %{ endif ~}
 %{ endif ~}
-%{ if walg_s3_endpoint != "" ~}
+%{ if length(walg_env_vars) > 0 ~}
       - /home/dynamic/walg.env:/home/dynamic/walg.env:ro
 %{ endif ~}
       - /mnt/data/compose:/mnt/data/compose
@@ -86,6 +86,13 @@ services:
     restart: unless-stopped
     networks:
       - traefik-net
+
+  ofelia:
+    image: mcuadros/ofelia:0.3.22
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: daemon --docker
+    restart: unless-stopped
 
   nginx-static:
     image: nginx:1.27-alpine
