@@ -50,7 +50,7 @@ write_files:
         "log-opts": {
           "awslogs-region": "${cloudwatch_logs_region}",
           "awslogs-group": "/docker/${domain}",
-          "awslogs-create-group": "true",
+          "awslogs-create-group": "false",
           "tag": "{{.Name}}"
         }
       }
