@@ -28,6 +28,8 @@ locals {
     registry_password          = var.registry_password
     use_ecr_credential_helper  = var.use_ecr_credential_helper
     walg_env_vars              = var.walg_env_vars
+    cloudwatch_logs_region     = var.cloudwatch_logs_region
+    domain                     = var.domain
     docker_compose_content     = local.docker_compose_content
     startup_sh_content         = local.startup_sh_content
     traefik_tls_content        = file("${path.module}/templates/traefik-tls.yml")

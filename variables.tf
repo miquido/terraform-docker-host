@@ -83,6 +83,12 @@ variable "block_device" {
   default     = "/dev/sdb"
 }
 
+variable "cloudwatch_logs_region" {
+  description = "AWS region for CloudWatch Logs Docker log driver. Empty string disables CloudWatch logging."
+  type        = string
+  default     = ""
+}
+
 variable "walg_env_vars" {
   description = "WAL-G environment variables written to /home/dynamic/walg.env. Empty map = skip file generation. Cloud-agnostic: pass whatever KEY=VALUE pairs your storage backend requires (AWS S3 IAM, S3-compatible endpoint, GCS, Azure Blob, etc.)."
   type        = map(string)

@@ -40,6 +40,21 @@ write_files:
       ${key}=${value}
 %{ endfor ~}
 %{ endif ~}
+%{ if cloudwatch_logs_region != "" ~}
+  - path: /etc/docker/daemon.json
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      {
+        "log-driver": "awslogs",
+        "log-opts": {
+          "awslogs-region": "${cloudwatch_logs_region}",
+          "awslogs-group": "/docker/${domain}",
+          "awslogs-create-group": "true",
+          "tag": "{{.Name}}"
+        }
+      }
+%{ endif ~}
 %{ if use_ecr_credential_helper ~}
   - path: /root/.docker/ecr-refresh.sh
     owner: 'root:root'
