@@ -15,6 +15,7 @@ locals {
     registry_url                = var.registry_url
     use_ecr_credential_helper   = var.use_ecr_credential_helper
     walg_env_vars               = var.walg_env_vars
+    docker_prune_schedule       = var.docker_prune_schedule
   })
 
   startup_sh_content = templatefile("${path.module}/templates/startup.sh.tftpl", {

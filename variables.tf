@@ -89,6 +89,12 @@ variable "cloudwatch_logs_region" {
   default     = ""
 }
 
+variable "docker_prune_schedule" {
+  description = "Cron schedule for Docker image pruning via Ofelia. Set to empty string to disable."
+  type        = string
+  default     = "0 3 * * *"
+}
+
 variable "walg_env_vars" {
   description = "WAL-G environment variables written to /home/dynamic/walg.env. Empty map = skip file generation. Cloud-agnostic: pass whatever KEY=VALUE pairs your storage backend requires (AWS S3 IAM, S3-compatible endpoint, GCS, Azure Blob, etc.)."
   type        = map(string)

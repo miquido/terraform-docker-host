@@ -93,6 +93,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: daemon --docker
     restart: unless-stopped
+%{ if docker_prune_schedule != "" ~}
+    labels:
+      - "ofelia.enabled=true"
+      - "ofelia.job-run.docker-prune.schedule=${docker_prune_schedule}"
+      - "ofelia.job-run.docker-prune.image=docker:cli"
+      - "ofelia.job-run.docker-prune.volume=/var/run/docker.sock:/var/run/docker.sock"
+      - "ofelia.job-run.docker-prune.command=docker image prune -af"
+%{ endif ~}
 
   nginx-static:
     image: nginx:1.27-alpine
