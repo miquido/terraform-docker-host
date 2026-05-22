@@ -33,6 +33,12 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json"
       - "--entrypoints.postgres.address=:5432"
       - "--providers.file.filename=/etc/traefik/traefik-tls.yml"
+%{ if alloy_remote_write_url != "" || cloudwatch_region != "" ~}
+      - "--entrypoints.metrics.address=:8080"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.entrypoint=metrics"
+      - "--metrics.prometheus.addRoutersLabels=true"
+%{ endif ~}
     restart: unless-stopped
     networks:
       - traefik-net
@@ -48,12 +54,23 @@ services:
       - "while true; do sh /root/.docker/ecr-refresh.sh; sleep 21600; done"
     volumes:
       - /root/.docker:/root/.docker
+    healthcheck:
+      test: ["CMD", "sh", "-c", "test -f /root/.docker/config.json"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 0s
     restart: unless-stopped
 
 %{ endif ~}
   docker-compose-runner:
     user: root
     image: ${docker_compose_runner_image}
+%{ if use_ecr_credential_helper ~}
+    depends_on:
+      ecr-login:
+        condition: service_healthy
+%{ endif ~}
     environment:
       OIDC_JWKS_URL: ${oidc_jwks_url}
       OIDC_AUDIENCE: ${oidc_audience}
@@ -102,6 +119,30 @@ services:
       - "ofelia.job-run.docker-prune.command=docker image prune -af"
 %{ endif ~}
 
+%{ if alloy_remote_write_url != "" ~}
+  alloy:
+    image: grafana/alloy:latest
+    volumes:
+      - /home/dynamic/alloy-config.alloy:/etc/alloy/config.alloy:ro
+    command: run /etc/alloy/config.alloy
+    restart: unless-stopped
+    networks:
+      - traefik-net
+
+%{ endif ~}
+%{ if cloudwatch_region != "" ~}
+  cloudwatch-agent:
+    image: amazon/cloudwatch-agent:latest
+    environment:
+      AWS_REGION: ${cloudwatch_region}
+    volumes:
+      - /home/dynamic/cwagent-config.json:/etc/cwagentconfig/cwagent-config.json:ro
+      - /home/dynamic/prometheus.yaml:/etc/cwagent/prometheus.yaml:ro
+    restart: unless-stopped
+    networks:
+      - traefik-net
+
+%{ endif ~}
   nginx-static:
     image: nginx:1.27-alpine
     labels:

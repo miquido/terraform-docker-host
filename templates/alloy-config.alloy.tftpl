@@ -1,0 +1,16 @@
+prometheus.scrape "traefik" {
+  targets         = [{"__address__" = "traefik:8080"}]
+  forward_to      = [prometheus.remote_write.default.receiver]
+  metrics_path    = "/metrics"
+  scrape_interval = "30s"
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "${alloy_remote_write_url}"
+    basic_auth {
+      username = "${alloy_remote_write_username}"
+      password = "${alloy_remote_write_token}"
+    }
+  }
+}

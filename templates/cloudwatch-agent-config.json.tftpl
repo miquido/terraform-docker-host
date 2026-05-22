@@ -1,0 +1,40 @@
+{
+  "logs": {
+    "metrics_collected": {
+      "prometheus": {
+        "cluster_name": "traefik",
+        "log_group_name": "/docker/${domain}",
+        "prometheus_config_path": "/etc/cwagent/prometheus.yaml",
+        "emf_processor": {
+          "metric_declaration_dedup": true,
+          "metric_declaration": [
+            {
+              "source_labels": ["job"],
+              "label_matcher": "traefik",
+              "dimensions": [["service", "code"]],
+              "metric_selectors": [
+                "traefik_service_requests_total"
+              ]
+            },
+            {
+              "source_labels": ["job"],
+              "label_matcher": "traefik",
+              "dimensions": [["entrypoint", "code"]],
+              "metric_selectors": [
+                "traefik_entrypoint_requests_total"
+              ]
+            },
+            {
+              "source_labels": ["job"],
+              "label_matcher": "traefik",
+              "dimensions": [["router"]],
+              "metric_selectors": [
+                "traefik_router_requests_total"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

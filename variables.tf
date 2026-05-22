@@ -83,8 +83,8 @@ variable "block_device" {
   default     = "/dev/sdb"
 }
 
-variable "cloudwatch_logs_region" {
-  description = "AWS region for CloudWatch Logs Docker log driver. Empty string disables CloudWatch logging."
+variable "cloudwatch_region" {
+  description = "AWS region for CloudWatch (logs + metrics). Empty string disables both."
   type        = string
   default     = ""
 }
@@ -93,6 +93,31 @@ variable "docker_prune_schedule" {
   description = "Cron schedule for Docker image pruning via Ofelia. Set to empty string to disable."
   type        = string
   default     = "0 3 * * *"
+}
+
+variable "alloy_remote_write_url" {
+  description = "Full Prometheus remote_write URL for Grafana Alloy (e.g. https://metrics.../api/v1/push). Empty string disables Alloy."
+  type        = string
+  default     = ""
+}
+
+variable "alloy_remote_write_username" {
+  description = "Basic auth username for Alloy remote_write. Scaleway Cockpit uses 'scaleway'."
+  type        = string
+  default     = "scaleway"
+}
+
+variable "alloy_remote_write_token" {
+  description = "Basic auth password / token for Alloy remote_write."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "ssh_public_keys" {
+  description = "List of SSH public keys added to the dynamic user's authorized_keys."
+  type        = list(string)
+  default     = []
 }
 
 variable "walg_env_vars" {

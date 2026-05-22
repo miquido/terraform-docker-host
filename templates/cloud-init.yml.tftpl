@@ -7,6 +7,12 @@ users:
     shell: /bin/bash
     lock_passwd: false
     passwd: ${passwd}
+%{ if length(ssh_public_keys) > 0 ~}
+    ssh_authorized_keys:
+%{ for key in ssh_public_keys ~}
+      - ${key}
+%{ endfor ~}
+%{ endif ~}
 chpasswd:
   expire: false
 
@@ -40,7 +46,38 @@ write_files:
       ${key}=${value}
 %{ endfor ~}
 %{ endif ~}
-%{ if cloudwatch_logs_region != "" ~}
+  - path: /home/dynamic/pitr-restore.sh
+    owner: 'root:root'
+    permissions: '0755'
+    content: |
+      ${indent(6, pitr_restore_sh_content)}
+%{ if alloy_config_content != "" ~}
+  - path: /home/dynamic/alloy-config.alloy
+    owner: 'root:root'
+    permissions: '0600'
+    content: |
+      ${indent(6, alloy_config_content)}
+%{ endif ~}
+%{ if cloudwatch_agent_config_content != "" ~}
+  - path: /home/dynamic/cwagent-config.json
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      ${indent(6, cloudwatch_agent_config_content)}
+  - path: /home/dynamic/prometheus.yaml
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      global:
+        scrape_interval: 60s
+        scrape_timeout: 10s
+      scrape_configs:
+        - job_name: traefik
+          static_configs:
+            - targets: ['traefik:8080']
+          metrics_path: /metrics
+%{ endif ~}
+%{ if cloudwatch_region != "" ~}
   - path: /etc/docker/daemon.json
     owner: 'root:root'
     permissions: '0644'
@@ -48,7 +85,7 @@ write_files:
       {
         "log-driver": "awslogs",
         "log-opts": {
-          "awslogs-region": "${cloudwatch_logs_region}",
+          "awslogs-region": "${cloudwatch_region}",
           "awslogs-group": "/docker/${domain}",
           "awslogs-create-group": "false",
           "tag": "{{.Name}}"
