@@ -43,7 +43,7 @@ variable "ip_allowlist" {
 variable "docker_compose_runner_image" {
   description = "Docker image for the docker-compose-runner service"
   type        = string
-  default     = "miquido/gitlab-docker-compose-host:172950-746ccb39"
+  default     = "ghcr.io/miquido/gitlab-docker-compose-host:199983-be07bdc3"
 }
 
 variable "passwd_hash" {
