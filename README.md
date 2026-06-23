@@ -57,7 +57,7 @@ No resources.
 | <a name="input_cloudwatch_region"></a> [cloudwatch\_region](#input\_cloudwatch\_region) | AWS region for CloudWatch (logs + metrics). Empty string disables both. | `string` | `""` | no |
 | <a name="input_dns_challenge_env"></a> [dns\_challenge\_env](#input\_dns\_challenge\_env) | Environment variables required by the DNS challenge provider | `map(string)` | n/a | yes |
 | <a name="input_dns_challenge_provider"></a> [dns\_challenge\_provider](#input\_dns\_challenge\_provider) | Traefik ACME DNS challenge provider (e.g. route53, cloudflare) | `string` | `"route53"` | no |
-| <a name="input_docker_compose_runner_image"></a> [docker\_compose\_runner\_image](#input\_docker\_compose\_runner\_image) | Docker image for the docker-compose-runner service | `string` | `"miquido/gitlab-docker-compose-host:172950-746ccb39"` | no |
+| <a name="input_docker_compose_runner_image"></a> [docker\_compose\_runner\_image](#input\_docker\_compose\_runner\_image) | Docker image for the docker-compose-runner service | `string` | `"ghcr.io/miquido/gitlab-docker-compose-host:199983-be07bdc3"` | no |
 | <a name="input_docker_prune_schedule"></a> [docker\_prune\_schedule](#input\_docker\_prune\_schedule) | Cron schedule for Docker image pruning via Ofelia. Set to empty string to disable. | `string` | `"0 3 * * *"` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain for wildcard certificate and routing (e.g. dmc.miquido.dev) | `string` | n/a | yes |
 | <a name="input_ip_allowlist"></a> [ip\_allowlist](#input\_ip\_allowlist) | CIDR range allowed to access the docker-compose-runner endpoint | `string` | n/a | yes |
