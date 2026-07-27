@@ -1,3 +1,10 @@
+# [1.1.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v1.0.0...v1.1.0) (2026-07-27)
+
+
+### Features
+
+* logs + static pages basic auth ([4da713d](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/4da713d895c3ace742e6c957acfc2050e35059f9))
+
 # 1.0.0 (2026-06-23)
 
 
