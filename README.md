@@ -50,6 +50,9 @@ No resources.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_acme_email"></a> [acme\_email](#input\_acme\_email) | Email for Let's Encrypt ACME registration | `string` | n/a | yes |
+| <a name="input_alloy_loki_write_token"></a> [alloy\_loki\_write\_token](#input\_alloy\_loki\_write\_token) | Basic auth password / token for Alloy Loki write. | `string` | `""` | no |
+| <a name="input_alloy_loki_write_url"></a> [alloy\_loki\_write\_url](#input\_alloy\_loki\_write\_url) | Loki-compatible push URL for shipping Docker container logs via Grafana Alloy (e.g. https://.../loki/api/v1/push). Empty string disables log shipping. | `string` | `""` | no |
+| <a name="input_alloy_loki_write_username"></a> [alloy\_loki\_write\_username](#input\_alloy\_loki\_write\_username) | Basic auth username for Alloy Loki write. Scaleway Cockpit uses 'scaleway'. | `string` | `"scaleway"` | no |
 | <a name="input_alloy_remote_write_token"></a> [alloy\_remote\_write\_token](#input\_alloy\_remote\_write\_token) | Basic auth password / token for Alloy remote\_write. | `string` | `""` | no |
 | <a name="input_alloy_remote_write_url"></a> [alloy\_remote\_write\_url](#input\_alloy\_remote\_write\_url) | Full Prometheus remote\_write URL for Grafana Alloy (e.g. https://metrics.../api/v1/push). Empty string disables Alloy. | `string` | `""` | no |
 | <a name="input_alloy_remote_write_username"></a> [alloy\_remote\_write\_username](#input\_alloy\_remote\_write\_username) | Basic auth username for Alloy remote\_write. Scaleway Cockpit uses 'scaleway'. | `string` | `"scaleway"` | no |
@@ -57,7 +60,7 @@ No resources.
 | <a name="input_cloudwatch_region"></a> [cloudwatch\_region](#input\_cloudwatch\_region) | AWS region for CloudWatch (logs + metrics). Empty string disables both. | `string` | `""` | no |
 | <a name="input_dns_challenge_env"></a> [dns\_challenge\_env](#input\_dns\_challenge\_env) | Environment variables required by the DNS challenge provider | `map(string)` | n/a | yes |
 | <a name="input_dns_challenge_provider"></a> [dns\_challenge\_provider](#input\_dns\_challenge\_provider) | Traefik ACME DNS challenge provider (e.g. route53, cloudflare) | `string` | `"route53"` | no |
-| <a name="input_docker_compose_runner_image"></a> [docker\_compose\_runner\_image](#input\_docker\_compose\_runner\_image) | Docker image for the docker-compose-runner service | `string` | `"ghcr.io/miquido/gitlab-docker-compose-host:199983-be07bdc3"` | no |
+| <a name="input_docker_compose_runner_image"></a> [docker\_compose\_runner\_image](#input\_docker\_compose\_runner\_image) | Docker image for the docker-compose-runner service | `string` | `"ghcr.io/miquido/gitlab-docker-compose-host:v1.1.1"` | no |
 | <a name="input_docker_prune_schedule"></a> [docker\_prune\_schedule](#input\_docker\_prune\_schedule) | Cron schedule for Docker image pruning via Ofelia. Set to empty string to disable. | `string` | `"0 3 * * *"` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain for wildcard certificate and routing (e.g. dmc.miquido.dev) | `string` | n/a | yes |
 | <a name="input_ip_allowlist"></a> [ip\_allowlist](#input\_ip\_allowlist) | CIDR range allowed to access the docker-compose-runner endpoint | `string` | n/a | yes |

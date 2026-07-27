@@ -43,7 +43,7 @@ variable "ip_allowlist" {
 variable "docker_compose_runner_image" {
   description = "Docker image for the docker-compose-runner service"
   type        = string
-  default     = "ghcr.io/miquido/gitlab-docker-compose-host:199983-be07bdc3"
+  default     = "ghcr.io/miquido/gitlab-docker-compose-host:v1.1.1"
 }
 
 variable "passwd_hash" {
@@ -109,6 +109,25 @@ variable "alloy_remote_write_username" {
 
 variable "alloy_remote_write_token" {
   description = "Basic auth password / token for Alloy remote_write."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "alloy_loki_write_url" {
+  description = "Loki-compatible push URL for shipping Docker container logs via Grafana Alloy (e.g. https://.../loki/api/v1/push). Empty string disables log shipping."
+  type        = string
+  default     = ""
+}
+
+variable "alloy_loki_write_username" {
+  description = "Basic auth username for Alloy Loki write. Scaleway Cockpit uses 'scaleway'."
+  type        = string
+  default     = "scaleway"
+}
+
+variable "alloy_loki_write_token" {
+  description = "Basic auth password / token for Alloy Loki write."
   type        = string
   default     = ""
   sensitive   = true

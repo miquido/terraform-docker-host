@@ -1,10 +1,13 @@
 locals {
   domain_escaped = replace(var.domain, ".", "\\\\.")
 
-  alloy_config_content = var.alloy_remote_write_url != "" ? templatefile("${path.module}/templates/alloy-config.alloy.tftpl", {
+  alloy_config_content = (var.alloy_remote_write_url != "" || var.alloy_loki_write_url != "") ? templatefile("${path.module}/templates/alloy-config.alloy.tftpl", {
     alloy_remote_write_url      = var.alloy_remote_write_url
     alloy_remote_write_username = var.alloy_remote_write_username
     alloy_remote_write_token    = var.alloy_remote_write_token
+    alloy_loki_write_url        = var.alloy_loki_write_url
+    alloy_loki_write_username   = var.alloy_loki_write_username
+    alloy_loki_write_token      = var.alloy_loki_write_token
   }) : ""
 
   cloudwatch_agent_config_content = var.cloudwatch_region != "" ? templatefile("${path.module}/templates/cloudwatch-agent-config.json.tftpl", {
@@ -27,6 +30,7 @@ locals {
     walg_env_vars               = var.walg_env_vars
     docker_prune_schedule       = var.docker_prune_schedule
     alloy_remote_write_url      = var.alloy_remote_write_url
+    alloy_loki_write_url        = var.alloy_loki_write_url
     cloudwatch_region           = var.cloudwatch_region
   })
 

@@ -119,11 +119,12 @@ services:
       - "ofelia.job-run.docker-prune.command=docker image prune -af"
 %{ endif ~}
 
-%{ if alloy_remote_write_url != "" ~}
+%{ if alloy_remote_write_url != "" || alloy_loki_write_url != "" ~}
   alloy:
     image: grafana/alloy:latest
     volumes:
       - /home/dynamic/alloy-config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: run /etc/alloy/config.alloy
     restart: unless-stopped
     networks:
