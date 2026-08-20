@@ -1,3 +1,10 @@
+## [1.4.2](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v1.4.1...v1.4.2) (2026-08-20)
+
+
+### Bug Fixes
+
+* **cicd:** default validate-terraform ([eabb3fb](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/eabb3fb1793119022442ee49eeffa420fa7eca92))
+
 ## [1.4.1](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v1.4.0...v1.4.1) (2026-08-20)
 
 
