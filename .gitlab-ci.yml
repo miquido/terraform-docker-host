@@ -1,7 +1,7 @@
 ---
 include:
-  - remote: "https://raw.githubusercontent.com/miquido/gitlab-templates/1.3.134/gitlab-toolkit.yml"
-  - remote: "https://raw.githubusercontent.com/miquido/gitlab-templates/1.3.134/terraform-toolkit.yml"
+  - remote: "https://raw.githubusercontent.com/miquido/gitlab-templates/1.3.135/gitlab-toolkit.yml"
+  - remote: "https://raw.githubusercontent.com/miquido/gitlab-templates/1.3.135/terraform-toolkit.yml"
 
 stages:
   - test
@@ -9,9 +9,6 @@ stages:
 
 validate-terraform:
   extends: .validate-terraform
-  parallel:
-    matrix:
-      - TF_DIR: ["."]
 
 validate-readme:
   extends: .validate-readme
