@@ -1,3 +1,10 @@
+## [1.4.1](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v1.4.0...v1.4.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* CICD ([52149a1](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/52149a1c4c4bd742a97a8c03bb2b11fcce82447e))
+
 # [1.1.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v1.0.0...v1.1.0) (2026-07-27)
 
 
