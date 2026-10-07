@@ -53,10 +53,11 @@ write_files:
       ${indent(6, ofelia_ini_content)}
 %{ if length(walg_env_vars) > 0 ~}
   - path: /etc/docker-host/walg.env
-    # Group-readable by the login user: compose files started by hand (not only by the root
-    # docker-compose-runner) use it as env_file, and the old /home/<user>/walg.env was readable too.
-    owner: 'root:${vm_user}'
-    permissions: '0640'
+    # Written root-only: the login user's group may not exist yet when write_files runs (chown to an
+    # unknown group aborts the whole module and skips every file after it). The runcmd below gives the
+    # group read access once the user exists, so compose files started by hand can use it as env_file.
+    owner: 'root:root'
+    permissions: '0600'
     content: |
 %{ for key, value in walg_env_vars ~}
       ${key}=${value}
