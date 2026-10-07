@@ -1,0 +1,36 @@
+map $sub $auth_realm {
+    default "off";
+    # Wildcard include: safe even before any subdomain has ever used basic auth,
+    # since a fresh server has no .nginx-auth directory yet.
+    include /data/static/.nginx-auth/*.map;
+}
+
+server {
+  listen 80;
+  server_name ~^(?P<sub>[^.]+)\..+$;
+  root /data/static/$sub;
+  index index.html;
+
+  auth_basic $auth_realm;
+  auth_basic_user_file /data/static/.htpasswd/$sub;
+%{ if server_extra != "" ~}
+
+  ${indent(2, server_extra)}
+%{ endif ~}
+
+  location / {
+    try_files $uri $uri/ @no_site;
+  }
+
+  location @no_site {
+    # No /data/static/$sub directory at all — this is Traefik's low-priority catchall for
+    # any *.<domain> host with no more specific router (e.g. a stopped CI-deployed
+    # docker-compose app), not a genuinely missing page within a real static site. 503, not
+    # 404, so external health checks (Gatus's `[STATUS] < 500`) see this as down instead of
+    # a misleadingly "healthy" 404.
+    if (!-d $document_root) {
+      return 503;
+    }
+    return 404;
+  }
+}

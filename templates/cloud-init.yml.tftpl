@@ -1,96 +1,98 @@
 #cloud-config
+%{ if hostname != "" ~}
+hostname: ${hostname}
+%{ endif ~}
 users:
-  - name: dynamic
+  - name: ${vm_user}
     gecos: "Dynamic User"
     sudo: ALL=(ALL) NOPASSWD:ALL
     groups: sudo
     shell: /bin/bash
+%{ if passwd != "" ~}
     lock_passwd: false
     passwd: ${passwd}
+%{ else ~}
+    lock_passwd: true
+%{ endif ~}
 %{ if length(ssh_public_keys) > 0 ~}
     ssh_authorized_keys:
 %{ for key in ssh_public_keys ~}
       - ${key}
 %{ endfor ~}
 %{ endif ~}
+%{ if passwd != "" ~}
 chpasswd:
   expire: false
+%{ endif ~}
 
 write_files:
-  - path: /home/dynamic/docker-compose.yml
+  - path: /home/${vm_user}/docker-compose.yml
     owner: 'root:root'
     permissions: '0644'
     content: |
       ${indent(6, docker_compose_content)}
-  - path: /home/dynamic/startup.sh
+  - path: /home/${vm_user}/startup.sh
     owner: 'root:root'
     permissions: '0744'
     content: |
       ${indent(6, startup_sh_content)}
-  - path: /home/dynamic/nginx-static.conf
+  - path: /home/${vm_user}/nginx-static.conf
     owner: 'root:root'
     permissions: '0644'
     content: |
       ${indent(6, nginx_static_content)}
-  - path: /home/dynamic/traefik-tls.yml
+  - path: /home/${vm_user}/traefik-tls.yml
     owner: 'root:root'
     permissions: '0644'
     content: |
       ${indent(6, traefik_tls_content)}
-%{ if length(walg_env_vars) > 0 ~}
-  - path: /home/dynamic/walg.env
+  - path: /etc/docker-host/ofelia.ini
     owner: 'root:root'
-    permissions: '0600'
+    permissions: '0644'
+    content: |
+      ${indent(6, ofelia_ini_content)}
+%{ if length(walg_env_vars) > 0 ~}
+  - path: /etc/docker-host/walg.env
+    # Group-readable by the login user: compose files started by hand (not only by the root
+    # docker-compose-runner) use it as env_file, and the old /home/<user>/walg.env was readable too.
+    owner: 'root:${vm_user}'
+    permissions: '0640'
     content: |
 %{ for key, value in walg_env_vars ~}
       ${key}=${value}
 %{ endfor ~}
 %{ endif ~}
-  - path: /home/dynamic/pitr-restore.sh
+  - path: /usr/local/bin/pitr-restore
     owner: 'root:root'
     permissions: '0755'
     content: |
       ${indent(6, pitr_restore_sh_content)}
+  - path: /usr/local/bin/pitr-restore-mysql
+    owner: 'root:root'
+    permissions: '0755'
+    content: |
+      ${indent(6, pitr_restore_mysql_sh_content)}
 %{ if alloy_config_content != "" ~}
-  - path: /home/dynamic/alloy-config.alloy
+  - path: /home/${vm_user}/alloy-config.alloy
     owner: 'root:root'
     permissions: '0600'
     content: |
       ${indent(6, alloy_config_content)}
 %{ endif ~}
-%{ if cloudwatch_agent_config_content != "" ~}
-  - path: /home/dynamic/cwagent-config.json
+%{ if registry_deferred_login ~}
+  - path: /etc/docker-host/registry-password
     owner: 'root:root'
-    permissions: '0644'
-    content: |
-      ${indent(6, cloudwatch_agent_config_content)}
-  - path: /home/dynamic/prometheus.yaml
+    permissions: '0600'
+    content: ${jsonencode(registry_password)}
+  - path: /usr/local/sbin/registry-login
     owner: 'root:root'
-    permissions: '0644'
+    permissions: '0700'
     content: |
-      global:
-        scrape_interval: 60s
-        scrape_timeout: 10s
-      scrape_configs:
-        - job_name: traefik
-          static_configs:
-            - targets: ['traefik:8080']
-          metrics_path: /metrics
-%{ endif ~}
-%{ if cloudwatch_region != "" ~}
-  - path: /etc/docker/daemon.json
-    owner: 'root:root'
-    permissions: '0644'
-    content: |
-      {
-        "log-driver": "awslogs",
-        "log-opts": {
-          "awslogs-region": "${cloudwatch_region}",
-          "awslogs-group": "/docker/${domain}",
-          "awslogs-create-group": "false",
-          "tag": "{{.Name}}"
-        }
-      }
+      #!/bin/sh
+      # The built-in registry only answers once Traefik has its certificate, so keep trying.
+      until docker login ${registry_url} -u ${registry_username} --password-stdin < /etc/docker-host/registry-password; do
+        sleep 10
+      done
 %{ endif ~}
 %{ if use_ecr_credential_helper ~}
   - path: /root/.docker/ecr-refresh.sh
@@ -103,19 +105,42 @@ write_files:
       mkdir -p /root/.docker
       printf '{"auths":{"${registry_url}":{"auth":"%s"}}}\n' "$AUTH" > /root/.docker/config.json
 %{ endif ~}
+%{ for f in extra_write_files ~}
+  - path: ${f.path}
+    owner: ${jsonencode(f.owner)}
+    permissions: ${jsonencode(f.permissions)}
+%{ if f.append ~}
+    append: true
+%{ endif ~}
+    content: ${jsonencode(f.content)}
+%{ endfor ~}
 
 runcmd:
   - [ sh, -c, "until apt-get update; do sleep 30; done" ]
-  - [ apt-get, install, -y, ca-certificates, curl ]
+  - [ apt-get, install, -y, ca-certificates, curl%{ for pkg in extra_packages ~}, ${pkg}%{ endfor ~} ]
   - [ install, -m, "0755", -d, /etc/apt/keyrings ]
   - [ sh, -c, "curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && chmod a+r /etc/apt/keyrings/docker.asc" ]
   - [ sh, -c, "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable\" | tee /etc/apt/sources.list.d/docker.list > /dev/null" ]
   - [ apt-get, update ]
   - [ apt-get, install, -y, docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin ]
-  - [ /home/dynamic/startup.sh ]
+  - [ /home/${vm_user}/startup.sh ]
+  - [ mkdir, -p, /mnt/data/certs, /mnt/data/compose, /mnt/data/static%{ if enable_registry ~}, /mnt/data/registry%{ endif ~} ]
+  - [ ln, -sf, /usr/local/bin/pitr-restore, /home/${vm_user}/pitr-restore.sh ]
+  - [ ln, -sf, /usr/local/bin/pitr-restore-mysql, /home/${vm_user}/pitr-restore-mysql.sh ]
+%{ if length(walg_env_vars) > 0 ~}
+  - [ ln, -sf, /etc/docker-host/walg.env, /home/${vm_user}/walg.env ]
+%{ endif ~}
+  - [ usermod, -aG, docker, ${vm_user} ]
   - [ systemctl, enable, docker ]
   - [ systemctl, start, docker ]
-%{ if !use_ecr_credential_helper && registry_url != "" ~}
+%{ if !use_ecr_credential_helper && registry_url != "" && !registry_deferred_login ~}
   - [ docker, login, ${registry_url}, -u, ${registry_username}, -p, ${registry_password} ]
 %{ endif ~}
-  - [ docker, compose, -f, /home/dynamic/docker-compose.yml, up, -d ]
+%{ for cmd in extra_runcmd ~}
+  - [ sh, -c, ${jsonencode(cmd)} ]
+%{ endfor ~}
+  - [ mkdir, -p, /root/.docker ]
+  - [ docker, compose, -f, /home/${vm_user}/docker-compose.yml, up, -d ]
+%{ if registry_deferred_login ~}
+  - [ sh, -c, "nohup /usr/local/sbin/registry-login > /var/log/registry-login.log 2>&1 &" ]
+%{ endif ~}
