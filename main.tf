@@ -101,3 +101,10 @@ locals {
     nginx_static_content          = local.nginx_static_content
   })
 }
+
+check "registry_without_auth" {
+  assert {
+    condition     = !var.enable_registry || var.registry_htpasswd != ""
+    error_message = "enable_registry without registry_htpasswd serves registry.<domain> with no authentication: anyone who can reach the host can push images that the docker-compose-runner will then pull."
+  }
+}

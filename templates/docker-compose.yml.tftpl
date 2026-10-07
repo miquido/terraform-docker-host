@@ -4,7 +4,7 @@ networks:
 
 services:
   traefik:
-    image: traefik:v3
+    image: traefik:v3.7.13
 %{ if length(traefik_entrypoint) > 0 ~}
     entrypoint: ${jsonencode(traefik_entrypoint)}
 %{ endif ~}
@@ -61,7 +61,7 @@ services:
 
 %{ if use_ecr_credential_helper ~}
   ecr-login:
-    image: amazon/aws-cli
+    image: amazon/aws-cli:2.37.10
     entrypoint: /bin/sh
     environment:
       AWS_DEFAULT_REGION: ${split(".", registry_url)[3]}
@@ -140,7 +140,7 @@ services:
 
 %{ if alloy_remote_write_url != "" || alloy_loki_write_url != "" ~}
   alloy:
-    image: grafana/alloy:latest
+    image: grafana/alloy:v1.20.1
     volumes:
       - /home/${vm_user}/alloy-config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -152,7 +152,7 @@ services:
 %{ endif ~}
 %{ if enable_registry ~}
   registry:
-    image: registry:2
+    image: registry:2.8.3
     environment:
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
     volumes:
@@ -167,6 +167,9 @@ services:
       - "traefik.http.routers.registry.middlewares=registry-auth"
 %{ endif ~}
       - "ofelia.enabled=true"
+      # Garbage collection on a registry that is being pushed to can drop blobs of an in-flight push
+      # (docker/distribution recommends read-only mode while it runs); acceptable for the low push
+      # rate of a CI registry, revisit if pushes overlap the schedule.
       - "ofelia.job-exec.registry-gc.schedule=@daily"
       - "ofelia.job-exec.registry-gc.command=registry garbage-collect --delete-untagged /etc/docker/registry/config.yml"
     restart: unless-stopped

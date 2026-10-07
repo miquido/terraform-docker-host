@@ -26,6 +26,9 @@ ARG="${1:?Usage: $0 <postgres_container|compose_project> [target_time] [backup_n
 TARGET="${2:-LATEST}"
 BACKUP="${3:-LATEST}"
 
+# In compose-project mode the project's other running containers are stopped for the restore and started
+# again at the very end. If the script dies in between they stay stopped on purpose: starting applications
+# against a half-restored database is worse than an outage. Start them by hand once the database is sound.
 OTHERS=""
 if docker container inspect "$ARG" >/dev/null 2>&1; then
   PG="$ARG"
@@ -57,14 +60,12 @@ fi
 WALG_IMAGE=$(docker inspect "$PG" --format '{{.Config.Image}}')
 
 WALG_ENV=$(mktemp)
+trap 'rm -f "$WALG_ENV"' EXIT   # holds AWS keys: never leave it behind if a step fails
 docker inspect "$PG" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -E '^(WALG_|AWS_)' > "$WALG_ENV"
 PGDATA=$(docker inspect "$PG" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^PGDATA=' | cut -d= -f2)
-VOL_SRC=$(docker inspect "$PG" --format '{{(index .Mounts 0).Source}}')
-VOL_DST=$(docker inspect "$PG" --format '{{(index .Mounts 0).Destination}}')
-HOST_PGDATA="$VOL_SRC${PGDATA#$VOL_DST}"
 
 echo "Container:  $PG ($WALG_IMAGE)"
-echo "PGDATA:     $PGDATA (host: $HOST_PGDATA)"
+echo "PGDATA:     $PGDATA"
 echo "Target:     $TARGET"
 echo "Backup:     $BACKUP"
 

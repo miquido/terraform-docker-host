@@ -27,6 +27,7 @@ BACKUP="${3:-LATEST}"
 WALG_IMAGE=$(docker inspect "$MYSQL" --format '{{.Config.Image}}')
 
 WALG_ENV=$(mktemp)
+trap 'rm -f "$WALG_ENV"' EXIT   # holds AWS keys: never leave it behind if a step fails
 docker inspect "$MYSQL" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -E '^(WALG_|AWS_)' > "$WALG_ENV"
 
 echo "Container:  $MYSQL ($WALG_IMAGE)"

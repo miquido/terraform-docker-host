@@ -129,6 +129,9 @@ runcmd:
   - [ ln, -sf, /usr/local/bin/pitr-restore-mysql, /home/${vm_user}/pitr-restore-mysql.sh ]
 %{ if length(walg_env_vars) > 0 ~}
   - [ ln, -sf, /etc/docker-host/walg.env, /home/${vm_user}/walg.env ]
+  # write_files runs before the user/group is guaranteed to exist, so set the group explicitly here.
+  - [ chgrp, ${vm_user}, /etc/docker-host/walg.env ]
+  - [ chmod, '0640', /etc/docker-host/walg.env ]
 %{ endif ~}
   - [ usermod, -aG, docker, ${vm_user} ]
   - [ systemctl, enable, docker ]

@@ -4,7 +4,7 @@ Terraform module that generates a cloud-init configuration for a Docker host wit
 
 ## Quick start
 
-The module renders a cloud-init document; a platform wrapper creates the machine and feeds it in. Ready-made wrappers: `terraform-aws-docker-host` (EC2), `terraform-scaleway-docker-host`, and the Proxmox one in `proxmox-docker/modules/docker-host`. To use the core directly on any cloud:
+The module renders a cloud-init document; a platform wrapper creates the machine and feeds it in. Ready-made wrappers: `terraform-aws-docker-host` (EC2), `terraform-scaleway-docker-host`, and the Proxmox one in `terraform-proxmox-docker-host`. To use the core directly on any cloud:
 
 ```hcl
 module "docker_host" {
