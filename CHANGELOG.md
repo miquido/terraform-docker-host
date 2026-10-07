@@ -1,3 +1,23 @@
+# [2.0.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v1.4.2...v2.0.0) (2026-10-07)
+
+
+* feat!: v2 — platform-neutral core with extension points, stable host paths, working scheduled backups ([83e4e02](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/83e4e02ef24e4177a6d009ecb80bb23116c20d77))
+
+
+### Bug Fixes
+
+* review follow-ups — registry validation, pinned images, walg.env group, script hygiene ([d92928f](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/d92928f9f2b2afbaf21fba1ac453da274c8617bf))
+
+
+### BREAKING CHANGES
+
+* the login user is ubuntu instead of dynamic (/home/ubuntu instead of /home/dynamic);
+oidc_expected_subs is a list(string); cloudwatch_region and the CloudWatch agent moved out of the core
+(use enable_traefik_metrics and the extra_* inputs in the platform wrapper); the nginx-static template
+is rendered (nginx-static.conf.tftpl); passwd_hash is optional.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+
 ## [1.4.2](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v1.4.1...v1.4.2) (2026-08-20)
 
 
