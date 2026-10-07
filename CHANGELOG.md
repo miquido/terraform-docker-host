@@ -1,3 +1,10 @@
+## [2.0.1](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.0.0...v2.0.1) (2026-10-07)
+
+
+### Bug Fixes
+
+* write walg.env as root:root and set the login user's group in runcmd ([f54b328](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/f54b3280eb10ae6f44210c042a95950c0e34a26d))
+
 # [2.0.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v1.4.2...v2.0.0) (2026-10-07)
 
 
