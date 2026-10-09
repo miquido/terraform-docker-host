@@ -1,3 +1,11 @@
+# [2.1.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.0.1...v2.1.0) (2026-10-09)
+
+
+### Features
+
+* **mysql:** pitr-marker and marker:<name> for mysql-walg containers ([4317ac5](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/4317ac56655327ee344010cc565505a2b831d2ea))
+* pitr-marker, and marker:<name> as a pitr-restore target ([ca47253](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/ca47253196d900a7dd1f4e7b1b2ef40c1421a1c9))
+
 ## [2.0.1](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.0.0...v2.0.1) (2026-10-07)
 
 
