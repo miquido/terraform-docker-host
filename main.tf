@@ -73,6 +73,7 @@ locals {
   })
 
   pitr_restore_sh_content       = file("${path.module}/templates/pitr-restore.sh")
+  pitr_marker_sh_content        = file("${path.module}/templates/pitr-marker.sh")
   pitr_restore_mysql_sh_content = file("${path.module}/templates/pitr-restore-mysql.sh")
 
   cloud_init_config = templatefile("${path.module}/templates/cloud-init.yml.tftpl", {
@@ -96,6 +97,7 @@ locals {
     alloy_config_content          = local.alloy_config_content
     startup_sh_content            = local.startup_sh_content
     pitr_restore_sh_content       = local.pitr_restore_sh_content
+    pitr_marker_sh_content        = local.pitr_marker_sh_content
     pitr_restore_mysql_sh_content = local.pitr_restore_mysql_sh_content
     traefik_tls_content           = file("${path.module}/templates/traefik-tls.yml")
     nginx_static_content          = local.nginx_static_content

@@ -68,6 +68,11 @@ write_files:
     permissions: '0755'
     content: |
       ${indent(6, pitr_restore_sh_content)}
+  - path: /usr/local/bin/pitr-marker
+    owner: 'root:root'
+    permissions: '0755'
+    content: |
+      ${indent(6, pitr_marker_sh_content)}
   - path: /usr/local/bin/pitr-restore-mysql
     owner: 'root:root'
     permissions: '0755'
@@ -127,6 +132,7 @@ runcmd:
   - [ /home/${vm_user}/startup.sh ]
   - [ mkdir, -p, /mnt/data/certs, /mnt/data/compose, /mnt/data/static%{ if enable_registry ~}, /mnt/data/registry%{ endif ~} ]
   - [ ln, -sf, /usr/local/bin/pitr-restore, /home/${vm_user}/pitr-restore.sh ]
+  - [ ln, -sf, /usr/local/bin/pitr-marker, /home/${vm_user}/pitr-marker.sh ]
   - [ ln, -sf, /usr/local/bin/pitr-restore-mysql, /home/${vm_user}/pitr-restore-mysql.sh ]
 %{ if length(walg_env_vars) > 0 ~}
   - [ ln, -sf, /etc/docker-host/walg.env, /home/${vm_user}/walg.env ]
