@@ -30,6 +30,8 @@ Platform specifics (credential helpers, log shippers, NFS mounts, tunnels, ...) 
 
 ## Scheduled jobs (Ofelia)
 
+Self-healing is opt-in: with `enable_autoheal = true` the host runs `willfarrell/autoheal`, which restarts containers that Docker reports as `unhealthy`. It only touches containers that carry the label `autoheal=true` and define a `HEALTHCHECK`, so a container somebody stopped on purpose is left alone.
+
 Database backup jobs are declared as labels on the app's own containers (`ofelia.enabled=true`, `ofelia.job-exec.<job>.schedule/command`). The scheduler is the maintained `netresearch/ofelia` fork configured by `/etc/docker-host/ofelia.ini`:
 - it follows Docker events, so a stack redeployed later is picked up without restarting anything (the original `mcuadros/ofelia` reads labels once at start and silently drops jobs of containers created afterwards);
 - `job-exec-label-scope = container` names jobs `<container>.<job>`, so several projects can all define `backup`;
@@ -103,12 +105,14 @@ No resources.
 | <a name="input_alloy_remote_write_token"></a> [alloy\_remote\_write\_token](#input\_alloy\_remote\_write\_token) | Basic auth password / token for Alloy remote\_write. | `string` | `""` | no |
 | <a name="input_alloy_remote_write_url"></a> [alloy\_remote\_write\_url](#input\_alloy\_remote\_write\_url) | Full Prometheus remote\_write URL for Grafana Alloy (e.g. https://metrics.../api/v1/push). Empty string disables Alloy. | `string` | `""` | no |
 | <a name="input_alloy_remote_write_username"></a> [alloy\_remote\_write\_username](#input\_alloy\_remote\_write\_username) | Basic auth username for Alloy remote\_write. Scaleway Cockpit uses 'scaleway'. | `string` | `"scaleway"` | no |
+| <a name="input_autoheal_image"></a> [autoheal\_image](#input\_autoheal\_image) | Autoheal image used when enable\_autoheal is set. | `string` | `"willfarrell/autoheal:1.2.0"` | no |
 | <a name="input_block_device"></a> [block\_device](#input\_block\_device) | Block device path for the persistent data volume. Empty = no separate disk, /mnt/data lives on the root disk. | `string` | `"/dev/sdb"` | no |
 | <a name="input_dns_challenge_env"></a> [dns\_challenge\_env](#input\_dns\_challenge\_env) | Environment variables required by the DNS challenge provider. Empty map = credentials come from elsewhere (instance role, traefik\_extra\_environment, ...). | `map(string)` | `{}` | no |
 | <a name="input_dns_challenge_provider"></a> [dns\_challenge\_provider](#input\_dns\_challenge\_provider) | Traefik ACME DNS challenge provider (e.g. route53, cloudflare) | `string` | `"route53"` | no |
 | <a name="input_docker_compose_runner_image"></a> [docker\_compose\_runner\_image](#input\_docker\_compose\_runner\_image) | Docker image for the docker-compose-runner service | `string` | `"ghcr.io/miquido/gitlab-docker-compose-host:v1.4.0"` | no |
 | <a name="input_docker_prune_schedule"></a> [docker\_prune\_schedule](#input\_docker\_prune\_schedule) | Cron schedule for Docker image pruning via Ofelia. Set to empty string to disable. | `string` | `"0 3 * * *"` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain for wildcard certificate and routing (e.g. dmc.miquido.dev) | `string` | n/a | yes |
+| <a name="input_enable_autoheal"></a> [enable\_autoheal](#input\_enable\_autoheal) | Run willfarrell/autoheal, which restarts containers that Docker reports as `unhealthy`. Opt-in per container: only those labelled `autoheal=true` (and having a HEALTHCHECK) are touched. | `bool` | `false` | no |
 | <a name="input_enable_registry"></a> [enable\_registry](#input\_enable\_registry) | Run a registry:2 container at registry.<domain> (data in /mnt/data/registry, daily GC through Ofelia). It ships without authentication: protect it with static\_extra\_labels / extra\_compose\_services or the network. Independent of registry\_url, which is an external registry the host logs in to. | `bool` | `false` | no |
 | <a name="input_enable_traefik_metrics"></a> [enable\_traefik\_metrics](#input\_enable\_traefik\_metrics) | Expose Traefik Prometheus metrics on the internal `metrics` entrypoint (:8080) for a collector to scrape. Enabled automatically when Alloy is. | `bool` | `false` | no |
 | <a name="input_extra_compose_services"></a> [extra\_compose\_services](#input\_extra\_compose\_services) | YAML fragment with additional compose services, written at column 0 (it is indented under `services:` for you). | `string` | `""` | no |

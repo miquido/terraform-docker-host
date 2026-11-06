@@ -59,6 +59,8 @@ locals {
     walg_env_vars               = var.walg_env_vars
     docker_prune_schedule       = var.docker_prune_schedule
     ofelia_image                = var.ofelia_image
+    enable_autoheal             = var.enable_autoheal
+    autoheal_image              = var.autoheal_image
     alloy_remote_write_url      = var.alloy_remote_write_url
     alloy_loki_write_url        = var.alloy_loki_write_url
     enable_traefik_metrics      = var.enable_traefik_metrics
