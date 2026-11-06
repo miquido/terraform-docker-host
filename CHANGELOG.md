@@ -1,3 +1,10 @@
+# [2.2.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.1.0...v2.2.0) (2026-11-06)
+
+
+### Features
+
+* opt-in autoheal service (enable_autoheal, label autoheal=true) ([0630398](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/0630398fd29c10f2058162ab92a47eb2e4cb659f))
+
 # [2.1.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.0.1...v2.1.0) (2026-10-09)
 
 
