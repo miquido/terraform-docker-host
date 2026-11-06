@@ -109,6 +109,18 @@ variable "ofelia_image" {
   default     = "ghcr.io/netresearch/ofelia:1.0.1"
 }
 
+variable "enable_autoheal" {
+  description = "Run willfarrell/autoheal, which restarts containers that Docker reports as `unhealthy`. Opt-in per container: only those labelled `autoheal=true` (and having a HEALTHCHECK) are touched."
+  type        = bool
+  default     = false
+}
+
+variable "autoheal_image" {
+  description = "Autoheal image used when enable_autoheal is set."
+  type        = string
+  default     = "willfarrell/autoheal:1.2.0"
+}
+
 variable "docker_prune_schedule" {
   description = "Cron schedule for Docker image pruning via Ofelia. Set to empty string to disable."
   type        = string

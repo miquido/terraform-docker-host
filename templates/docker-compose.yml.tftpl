@@ -138,6 +138,21 @@ services:
     command: daemon
     restart: unless-stopped
 
+%{ if enable_autoheal ~}
+  autoheal:
+    # Restarts only containers labelled `autoheal=true` that Docker reports as unhealthy (so the
+    # container needs a HEALTHCHECK). Opt-in on purpose: AUTOHEAL_CONTAINER_LABEL=all would also
+    # restart containers somebody stopped or is debugging.
+    image: ${autoheal_image}
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_INTERVAL: "10"
+      AUTOHEAL_START_PERIOD: "60"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+%{ endif ~}
 %{ if alloy_remote_write_url != "" || alloy_loki_write_url != "" ~}
   alloy:
     image: grafana/alloy:v1.20.1
