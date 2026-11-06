@@ -1,3 +1,10 @@
+## [2.2.1](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.2.0...v2.2.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* default docker-compose-runner to v1.4.2 (v1.4.0 rejects dotted group paths) ([43df53e](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/43df53e64f63b005d0442bfcbc24439c289e9808))
+
 # [2.2.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.1.0...v2.2.0) (2026-11-06)
 
 
