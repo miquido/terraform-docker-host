@@ -69,8 +69,8 @@ fi
 WALG_IMAGE=$(docker inspect "$PG" --format '{{.Config.Image}}')
 
 WALG_ENV=$(mktemp)
-trap 'rm -f "$WALG_ENV"' EXIT   # holds AWS keys: never leave it behind if a step fails
-docker inspect "$PG" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -E '^(WALG_|AWS_)' > "$WALG_ENV"
+trap 'rm -f "$WALG_ENV"' EXIT   # holds storage keys (AWS_*, AZURE_*): never leave it behind if a step fails
+docker inspect "$PG" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -E '^(WALG_|AWS_|AZURE_)' > "$WALG_ENV"
 PGDATA=$(docker inspect "$PG" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^PGDATA=' | cut -d= -f2)
 
 echo "Container:  $PG ($WALG_IMAGE)"
