@@ -1,3 +1,10 @@
+## [2.2.2](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.2.1...v2.2.2) (2026-11-16)
+
+
+### Bug Fixes
+
+* pass AZURE_* variables to the pitr-restore helper containers ([eaddde0](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/eaddde08bf393cc29b5d4cde78e25dc9d9b69cf7))
+
 ## [2.2.1](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.2.0...v2.2.1) (2026-11-06)
 
 
