@@ -146,6 +146,18 @@ variable "alloy_remote_write_token" {
   sensitive   = true
 }
 
+variable "alloy_scrape_interval" {
+  description = "How often Alloy scrapes Traefik. Managed backends (e.g. Scaleway Cockpit) bill per sample, so 60s halves the cost of 30s."
+  type        = string
+  default     = "60s"
+}
+
+variable "alloy_metrics_keep_regex" {
+  description = "Regex of Traefik metric names Alloy forwards; everything else is dropped before it is sent. The default keeps what answers 'does this service get traffic': requests per router, open connections (also TCP/postgres), certificate expiry and the last config reload. Empty string = send everything (about 30x more samples, mostly latency histogram buckets)."
+  type        = string
+  default     = "traefik_router_requests_total|traefik_open_connections|traefik_tls_certs_not_after|traefik_config_last_reload_success"
+}
+
 variable "alloy_loki_write_url" {
   description = "Loki-compatible push URL for shipping Docker container logs via Grafana Alloy (e.g. https://.../loki/api/v1/push). Empty string disables log shipping."
   type        = string
