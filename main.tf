@@ -77,6 +77,8 @@ locals {
   pitr_restore_sh_content       = file("${path.module}/templates/pitr-restore.sh")
   pitr_marker_sh_content        = file("${path.module}/templates/pitr-marker.sh")
   pitr_restore_mysql_sh_content = file("${path.module}/templates/pitr-restore-mysql.sh")
+  backup_health_push_sh_content = file("${path.module}/templates/backup-health-push.sh")
+  gatus_push_enabled            = var.gatus_push_url != "" && var.gatus_push_key != "" && var.gatus_push_token != ""
 
   cloud_init_config = templatefile("${path.module}/templates/cloud-init.yml.tftpl", {
     vm_user                       = var.vm_user
@@ -101,6 +103,13 @@ locals {
     pitr_restore_sh_content       = local.pitr_restore_sh_content
     pitr_marker_sh_content        = local.pitr_marker_sh_content
     pitr_restore_mysql_sh_content = local.pitr_restore_mysql_sh_content
+    backup_health_push_sh_content = local.backup_health_push_sh_content
+    gatus_push_enabled            = local.gatus_push_enabled
+    gatus_push_url                = var.gatus_push_url
+    gatus_push_key                = var.gatus_push_key
+    gatus_push_token              = var.gatus_push_token
+    gatus_push_interval_minutes   = var.gatus_push_interval_minutes
+    max_base_backup_age_hours     = var.max_base_backup_age_hours
     traefik_tls_content           = file("${path.module}/templates/traefik-tls.yml")
     nginx_static_content          = local.nginx_static_content
   })

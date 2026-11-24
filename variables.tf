@@ -267,3 +267,34 @@ variable "extra_runcmd" {
   type        = list(string)
   default     = []
 }
+
+variable "gatus_push_url" {
+  description = "Base URL of a Gatus instance that receives backup-health heartbeats (e.g. https://gatus.example.com, no trailing slash). Empty = no health push. When set together with gatus_push_key and gatus_push_token, a systemd timer runs /usr/local/bin/backup-health-push, which checks every WAL-G postgres container (newest base backup age, WAL archiving failing) and the data disk, and pushes one success/failure status to the Gatus external endpoint. Applied by cloud-init, so only at VM creation."
+  type        = string
+  default     = ""
+}
+
+variable "gatus_push_key" {
+  description = "Gatus external endpoint key (<group>_<name>) the host pushes to."
+  type        = string
+  default     = ""
+}
+
+variable "gatus_push_token" {
+  description = "Bearer token of the Gatus external endpoint. Written to /etc/docker-host/gatus-push.env (root, 0600)."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "gatus_push_interval_minutes" {
+  description = "How often the backup-health check runs and pushes. Set the Gatus heartbeat interval to about twice this."
+  type        = number
+  default     = 15
+}
+
+variable "max_base_backup_age_hours" {
+  description = "Backup-health push reports a failure when the newest base backup is older than this."
+  type        = number
+  default     = 26
+}

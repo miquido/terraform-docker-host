@@ -38,6 +38,17 @@ Database backup jobs are declared as labels on the app's own containers (`ofelia
 - `default-user = root` (the fork's own default is `nobody`, which cannot read the database data directories);
 - `docker-prune` (`docker_prune_schedule`) is defined in the INI because the fork drops label-defined `job-run` jobs that mount `docker.sock`.
 
+## Backup health heartbeat (Gatus)
+
+Set `gatus_push_url`, `gatus_push_key` and `gatus_push_token` and the host runs `backup-health-push` from a
+systemd timer (every `gatus_push_interval_minutes`, default 15). It checks every running WAL-G postgres
+container (newest base backup not older than `max_base_backup_age_hours`, WAL archiving not currently
+failing) and the data disk, then pushes one success/failure status to a Gatus external endpoint. Gatus alerts
+on a failure push, and when pushes stop (VM down, timer dead). Create the endpoint in Gatus first and set its
+heartbeat interval to about twice the push interval. Applied by cloud-init, so only at VM creation; on an
+existing host install the script, `/etc/docker-host/gatus-push.env` and the timer by hand. Test with
+`DRY_RUN=1 /usr/local/bin/backup-health-push` (prints the verdict, pushes nothing). MySQL is not checked yet.
+
 ## On the host
 
 The same files and commands exist on every platform, whatever the VM user is, so app compose files and runbooks do not depend on the cloud:
@@ -119,8 +130,13 @@ No resources.
 | <a name="input_extra_packages"></a> [extra\_packages](#input\_extra\_packages) | Extra apt packages installed before Docker. | `list(string)` | `[]` | no |
 | <a name="input_extra_runcmd"></a> [extra\_runcmd](#input\_extra\_runcmd) | Extra shell commands run (as root) after Docker is installed and the data dir exists, right before `docker compose up`. | `list(string)` | `[]` | no |
 | <a name="input_extra_write_files"></a> [extra\_write\_files](#input\_extra\_write\_files) | Extra cloud-init write\_files entries. | <pre>list(object({<br/>    path        = string<br/>    content     = string<br/>    permissions = optional(string, "0644")<br/>    owner       = optional(string, "root:root")<br/>    append      = optional(bool, false)<br/>  }))</pre> | `[]` | no |
+| <a name="input_gatus_push_interval_minutes"></a> [gatus\_push\_interval\_minutes](#input\_gatus\_push\_interval\_minutes) | How often the backup-health check runs and pushes. Set the Gatus heartbeat interval to about twice this. | `number` | `15` | no |
+| <a name="input_gatus_push_key"></a> [gatus\_push\_key](#input\_gatus\_push\_key) | Gatus external endpoint key (<group>\_<name>) the host pushes to. | `string` | `""` | no |
+| <a name="input_gatus_push_token"></a> [gatus\_push\_token](#input\_gatus\_push\_token) | Bearer token of the Gatus external endpoint. Written to /etc/docker-host/gatus-push.env (root, 0600). | `string` | `""` | no |
+| <a name="input_gatus_push_url"></a> [gatus\_push\_url](#input\_gatus\_push\_url) | Base URL of a Gatus instance that receives backup-health heartbeats (e.g. https://gatus.example.com, no trailing slash). Empty = no health push. When set together with gatus\_push\_key and gatus\_push\_token, a systemd timer runs /usr/local/bin/backup-health-push, which checks every WAL-G postgres container (newest base backup age, WAL archiving failing) and the data disk, and pushes one success/failure status to the Gatus external endpoint. Applied by cloud-init, so only at VM creation. | `string` | `""` | no |
 | <a name="input_hostname"></a> [hostname](#input\_hostname) | VM hostname set through cloud-init. Empty = leave to the platform. | `string` | `""` | no |
 | <a name="input_ip_allowlist"></a> [ip\_allowlist](#input\_ip\_allowlist) | CIDR range allowed to access the docker-compose-runner endpoint | `string` | n/a | yes |
+| <a name="input_max_base_backup_age_hours"></a> [max\_base\_backup\_age\_hours](#input\_max\_base\_backup\_age\_hours) | Backup-health push reports a failure when the newest base backup is older than this. | `number` | `26` | no |
 | <a name="input_nginx_static_server_extra"></a> [nginx\_static\_server\_extra](#input\_nginx\_static\_server\_extra) | Extra nginx directives inserted into the server block of the static-sites vhost. | `string` | `""` | no |
 | <a name="input_ofelia_image"></a> [ofelia\_image](#input\_ofelia\_image) | Ofelia image running the scheduled jobs (backups, registry GC, image prune). Must be the netresearch fork: it follows Docker events and namespaces jobs per container (see docker-compose template). | `string` | `"ghcr.io/netresearch/ofelia:1.0.1"` | no |
 | <a name="input_oidc_audience"></a> [oidc\_audience](#input\_oidc\_audience) | Expected OIDC audience for docker-compose-runner | `string` | n/a | yes |

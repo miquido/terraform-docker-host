@@ -73,6 +73,42 @@ write_files:
     permissions: '0755'
     content: |
       ${indent(6, pitr_marker_sh_content)}
+%{ if gatus_push_enabled ~}
+  - path: /usr/local/bin/backup-health-push
+    owner: 'root:root'
+    permissions: '0755'
+    content: |
+      ${indent(6, backup_health_push_sh_content)}
+  - path: /etc/docker-host/gatus-push.env
+    owner: 'root:root'
+    permissions: '0600'
+    content: |
+      GATUS_PUSH_URL=${gatus_push_url}
+      GATUS_PUSH_KEY=${gatus_push_key}
+      GATUS_PUSH_TOKEN=${gatus_push_token}
+      MAX_BASE_BACKUP_AGE_HOURS=${max_base_backup_age_hours}
+  - path: /etc/systemd/system/backup-health-push.service
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Push WAL-G backup health to Gatus
+      After=docker.service
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/backup-health-push
+  - path: /etc/systemd/system/backup-health-push.timer
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Run backup-health-push every ${gatus_push_interval_minutes} minutes
+      [Timer]
+      OnBootSec=5min
+      OnUnitActiveSec=${gatus_push_interval_minutes}min
+      [Install]
+      WantedBy=timers.target
+%{ endif ~}
   - path: /usr/local/bin/pitr-restore-mysql
     owner: 'root:root'
     permissions: '0755'
@@ -139,6 +175,9 @@ runcmd:
   # write_files runs before the user/group is guaranteed to exist, so set the group explicitly here.
   - [ chgrp, ${vm_user}, /etc/docker-host/walg.env ]
   - [ chmod, '0640', /etc/docker-host/walg.env ]
+%{ endif ~}
+%{ if gatus_push_enabled ~}
+  - [ systemctl, enable, --now, backup-health-push.timer ]
 %{ endif ~}
   - [ usermod, -aG, docker, ${vm_user} ]
   - [ systemctl, enable, docker ]
