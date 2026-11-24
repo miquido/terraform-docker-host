@@ -1,3 +1,10 @@
+# [2.3.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.2.2...v2.3.0) (2026-11-24)
+
+
+### Features
+
+* Alloy forwards a curated Traefik metric set at 60s by default ([9bcad9f](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/9bcad9fed6b303feb20fa9c21b22404ed705b7b3))
+
 ## [2.2.2](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.2.1...v2.2.2) (2026-11-16)
 
 
