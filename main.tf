@@ -24,6 +24,8 @@ locals {
   domain_escaped = replace(var.domain, ".", "\\\\.")
 
   alloy_config_content = (var.alloy_remote_write_url != "" || var.alloy_loki_write_url != "") ? templatefile("${path.module}/templates/alloy-config.alloy.tftpl", {
+    alloy_scrape_interval       = var.alloy_scrape_interval
+    alloy_metrics_keep_regex    = var.alloy_metrics_keep_regex
     alloy_remote_write_url      = var.alloy_remote_write_url
     alloy_remote_write_username = var.alloy_remote_write_username
     alloy_remote_write_token    = var.alloy_remote_write_token

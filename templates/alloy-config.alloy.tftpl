@@ -1,9 +1,27 @@
 prometheus.scrape "traefik" {
   targets         = [{"__address__" = "traefik:8080"}]
+%{ if alloy_metrics_keep_regex != "" ~}
+  forward_to      = [prometheus.relabel.keep.receiver]
+%{ else ~}
   forward_to      = [prometheus.remote_write.default.receiver]
+%{ endif ~}
   metrics_path    = "/metrics"
-  scrape_interval = "30s"
+  scrape_interval = "${alloy_scrape_interval}"
 }
+
+%{ if alloy_metrics_keep_regex != "" ~}
+// Only the listed metrics are sent: managed backends bill per sample, and Traefik's full output
+// (mostly latency histogram buckets) is ~30x more than "is there traffic" needs.
+prometheus.relabel "keep" {
+  forward_to = [prometheus.remote_write.default.receiver]
+
+  rule {
+    source_labels = ["__name__"]
+    regex         = "${alloy_metrics_keep_regex}"
+    action        = "keep"
+  }
+}
+%{ endif ~}
 
 prometheus.remote_write "default" {
   endpoint {
