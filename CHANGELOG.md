@@ -1,3 +1,10 @@
+# [2.4.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.3.0...v2.4.0) (2026-11-25)
+
+
+### Features
+
+* Docker log rotation by default (docker_log_driver, docker_log_opts) ([f04c424](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/f04c424ff692e8dd473a8be971f8b0bfbdcaa2f3))
+
 # [2.3.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.2.2...v2.3.0) (2026-11-24)
 
 
