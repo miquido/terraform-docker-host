@@ -63,6 +63,12 @@ write_files:
       ${key}=${value}
 %{ endfor ~}
 %{ endif ~}
+%{ if docker_daemon_json != "" ~}
+  - path: /etc/docker/daemon.json
+    owner: 'root:root'
+    permissions: '0644'
+    content: ${jsonencode(docker_daemon_json)}
+%{ endif ~}
   - path: /usr/local/bin/pitr-restore
     owner: 'root:root'
     permissions: '0755'

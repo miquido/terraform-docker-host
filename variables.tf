@@ -279,3 +279,18 @@ variable "extra_runcmd" {
   type        = list(string)
   default     = []
 }
+
+variable "docker_log_driver" {
+  description = "Docker's default log driver, written to /etc/docker/daemon.json by cloud-init. The default json-file keeps every container's stdout/stderr in a local file, so it must be rotated (docker_log_opts); without rotation the files grow until the root disk is full. Empty string = do not write daemon.json at all. A wrapper that ships logs to a cloud service can set another driver here (awslogs, gcplogs) or write its own /etc/docker/daemon.json through extra_write_files, which is written last and wins."
+  type        = string
+  default     = "json-file"
+}
+
+variable "docker_log_opts" {
+  description = "Options of docker_log_driver. The default rotates json-file logs: at most 3 files of 20 MB (60 MB) per container. Applies to containers created after the daemon starts (new hosts), existing containers keep the config they were created with until they are recreated. Set to {} to keep Docker's default (no rotation)."
+  type        = map(string)
+  default = {
+    "max-size" = "20m"
+    "max-file" = "3"
+  }
+}

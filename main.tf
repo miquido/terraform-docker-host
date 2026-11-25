@@ -76,6 +76,12 @@ locals {
     block_device = var.block_device
   })
 
+  # Written before Docker starts (cloud-init write_files runs ahead of runcmd), so no daemon restart is needed.
+  docker_daemon_json = var.docker_log_driver == "" ? "" : jsonencode({
+    "log-driver" = var.docker_log_driver
+    "log-opts"   = var.docker_log_opts
+  })
+
   pitr_restore_sh_content       = file("${path.module}/templates/pitr-restore.sh")
   pitr_marker_sh_content        = file("${path.module}/templates/pitr-marker.sh")
   pitr_restore_mysql_sh_content = file("${path.module}/templates/pitr-restore-mysql.sh")
@@ -100,6 +106,7 @@ locals {
     docker_compose_content        = local.docker_compose_content
     alloy_config_content          = local.alloy_config_content
     startup_sh_content            = local.startup_sh_content
+    docker_daemon_json            = local.docker_daemon_json
     pitr_restore_sh_content       = local.pitr_restore_sh_content
     pitr_marker_sh_content        = local.pitr_marker_sh_content
     pitr_restore_mysql_sh_content = local.pitr_restore_mysql_sh_content
