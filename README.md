@@ -38,6 +38,16 @@ Database backup jobs are declared as labels on the app's own containers (`ofelia
 - `default-user = root` (the fork's own default is `nobody`, which cannot read the database data directories);
 - `docker-prune` (`docker_prune_schedule`) is defined in the INI because the fork drops label-defined `job-run` jobs that mount `docker.sock`.
 
+## Docker log rotation
+
+`docker_log_driver` (default `json-file`) and `docker_log_opts` (default `max-size 20m`, `max-file 3`) are written to
+`/etc/docker/daemon.json` by cloud-init. Without rotation `json-file` logs grow until the root disk is full (60 MB per
+container is the cap here). Set `docker_log_opts = {}` to keep Docker's default, or `docker_log_driver = ""` to not write
+the file at all. A wrapper that ships logs to a cloud service (`awslogs`, `gcplogs`) can set the driver here or write its
+own `/etc/docker/daemon.json` through `extra_write_files` (written last, so it wins). The setting reaches containers when
+they are created, so an existing host needs the file written by hand, a Docker restart and
+`docker compose up -d --force-recreate` to pick it up.
+
 ## On the host
 
 The same files and commands exist on every platform, whatever the VM user is, so app compose files and runbooks do not depend on the cloud:
@@ -112,6 +122,8 @@ No resources.
 | <a name="input_dns_challenge_env"></a> [dns\_challenge\_env](#input\_dns\_challenge\_env) | Environment variables required by the DNS challenge provider. Empty map = credentials come from elsewhere (instance role, traefik\_extra\_environment, ...). | `map(string)` | `{}` | no |
 | <a name="input_dns_challenge_provider"></a> [dns\_challenge\_provider](#input\_dns\_challenge\_provider) | Traefik ACME DNS challenge provider (e.g. route53, cloudflare) | `string` | `"route53"` | no |
 | <a name="input_docker_compose_runner_image"></a> [docker\_compose\_runner\_image](#input\_docker\_compose\_runner\_image) | Docker image for the docker-compose-runner service | `string` | `"ghcr.io/miquido/gitlab-docker-compose-host:v1.4.2"` | no |
+| <a name="input_docker_log_driver"></a> [docker\_log\_driver](#input\_docker\_log\_driver) | Docker's default log driver, written to /etc/docker/daemon.json by cloud-init. The default json-file keeps every container's stdout/stderr in a local file, so it must be rotated (docker\_log\_opts); without rotation the files grow until the root disk is full. Empty string = do not write daemon.json at all. A wrapper that ships logs to a cloud service can set another driver here (awslogs, gcplogs) or write its own /etc/docker/daemon.json through extra\_write\_files, which is written last and wins. | `string` | `"json-file"` | no |
+| <a name="input_docker_log_opts"></a> [docker\_log\_opts](#input\_docker\_log\_opts) | Options of docker\_log\_driver. The default rotates json-file logs: at most 3 files of 20 MB (60 MB) per container. Applies to containers created after the daemon starts (new hosts), existing containers keep the config they were created with until they are recreated. Set to {} to keep Docker's default (no rotation). | `map(string)` | <pre>{<br/>  "max-file": "3",<br/>  "max-size": "20m"<br/>}</pre> | no |
 | <a name="input_docker_prune_schedule"></a> [docker\_prune\_schedule](#input\_docker\_prune\_schedule) | Cron schedule for Docker image pruning via Ofelia. Set to empty string to disable. | `string` | `"0 3 * * *"` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain for wildcard certificate and routing (e.g. dmc.miquido.dev) | `string` | n/a | yes |
 | <a name="input_enable_autoheal"></a> [enable\_autoheal](#input\_enable\_autoheal) | Run willfarrell/autoheal, which restarts containers that Docker reports as `unhealthy`. Opt-in per container: only those labelled `autoheal=true` (and having a HEALTHCHECK) are touched. | `bool` | `false` | no |
