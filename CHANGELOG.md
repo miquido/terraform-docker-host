@@ -1,3 +1,10 @@
+# [2.5.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.4.1...v2.5.0) (2026-11-26)
+
+
+### Features
+
+* autoheal service on by default (still opt-in per container) ([6daa6eb](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/6daa6eb918463c89937a671bfa23fa96f74da287))
+
 ## [2.4.1](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.4.0...v2.4.1) (2026-11-26)
 
 
