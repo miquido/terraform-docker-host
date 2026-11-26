@@ -110,9 +110,9 @@ variable "ofelia_image" {
 }
 
 variable "enable_autoheal" {
-  description = "Run willfarrell/autoheal, which restarts containers that Docker reports as `unhealthy`. Opt-in per container: only those labelled `autoheal=true` (and having a HEALTHCHECK) are touched."
+  description = "Run willfarrell/autoheal, which restarts containers that Docker reports as `unhealthy`. Opt-in per container: only those labelled `autoheal=true` (and having a HEALTHCHECK) are touched, so without labels it does nothing. Leave databases unlabelled."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "autoheal_image" {

@@ -48,6 +48,28 @@ own `/etc/docker/daemon.json` through `extra_write_files` (written last, so it w
 they are created, so an existing host needs the file written by hand, a Docker restart and
 `docker compose up -d --force-recreate` to pick it up.
 
+## Autoheal
+
+`enable_autoheal` (default `true`) runs `willfarrell/autoheal`, which restarts containers that Docker reports as
+`unhealthy`. It is opt-in **per container**: only containers with the label `autoheal=true` (and a `HEALTHCHECK`)
+are touched, so with no labels it does nothing.
+
+```yaml
+services:
+  app:
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "localhost:8080/healthz"]
+      interval: 10s
+      retries: 3
+    labels:
+      autoheal: "true"
+```
+
+Label stateless services. Leave **databases** unlabelled: restarting one that is only briefly unhealthy under load
+tends to do more harm than good, so alert and look instead. Restarts are silent, so watch for them (for example a
+"restarted recently" check). Set `enable_autoheal = false` to drop the container. Existing hosts are not affected: the
+compose file is written by cloud-init when the VM is created.
+
 ## On the host
 
 The same files and commands exist on every platform, whatever the VM user is, so app compose files and runbooks do not depend on the cloud:
@@ -126,7 +148,7 @@ No resources.
 | <a name="input_docker_log_opts"></a> [docker\_log\_opts](#input\_docker\_log\_opts) | Options of docker\_log\_driver. The default rotates json-file logs: at most 3 files of 20 MB (60 MB) per container. Applies to containers created after the daemon starts (new hosts), existing containers keep the config they were created with until they are recreated. Set to {} to keep Docker's default (no rotation). | `map(string)` | <pre>{<br/>  "max-file": "3",<br/>  "max-size": "20m"<br/>}</pre> | no |
 | <a name="input_docker_prune_schedule"></a> [docker\_prune\_schedule](#input\_docker\_prune\_schedule) | Cron schedule for Docker image pruning via Ofelia. Set to empty string to disable. | `string` | `"0 3 * * *"` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | Base domain for wildcard certificate and routing (e.g. dmc.miquido.dev) | `string` | n/a | yes |
-| <a name="input_enable_autoheal"></a> [enable\_autoheal](#input\_enable\_autoheal) | Run willfarrell/autoheal, which restarts containers that Docker reports as `unhealthy`. Opt-in per container: only those labelled `autoheal=true` (and having a HEALTHCHECK) are touched. | `bool` | `false` | no |
+| <a name="input_enable_autoheal"></a> [enable\_autoheal](#input\_enable\_autoheal) | Run willfarrell/autoheal, which restarts containers that Docker reports as `unhealthy`. Opt-in per container: only those labelled `autoheal=true` (and having a HEALTHCHECK) are touched, so without labels it does nothing. Leave databases unlabelled. | `bool` | `true` | no |
 | <a name="input_enable_registry"></a> [enable\_registry](#input\_enable\_registry) | Run a registry:2 container at registry.<domain> (data in /mnt/data/registry, daily GC through Ofelia). It ships without authentication: protect it with static\_extra\_labels / extra\_compose\_services or the network. Independent of registry\_url, which is an external registry the host logs in to. | `bool` | `false` | no |
 | <a name="input_enable_traefik_metrics"></a> [enable\_traefik\_metrics](#input\_enable\_traefik\_metrics) | Expose Traefik Prometheus metrics on the internal `metrics` entrypoint (:8080) for a collector to scrape. Enabled automatically when Alloy is. | `bool` | `false` | no |
 | <a name="input_extra_compose_services"></a> [extra\_compose\_services](#input\_extra\_compose\_services) | YAML fragment with additional compose services, written at column 0 (it is indented under `services:` for you). | `string` | `""` | no |
