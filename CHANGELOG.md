@@ -1,3 +1,10 @@
+## [2.4.1](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.4.0...v2.4.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* docker-compose-runner v1.5.0 by default (rolls a failed deploy back to the last good one) ([4a020d6](https://gitlab.miquido.com/miquido/terraform/docker-host/commit/4a020d6c12ca55d3337fa5ecc5fd3e63de1ccaec))
+
 # [2.4.0](https://gitlab.miquido.com/miquido/terraform/docker-host/compare/v2.3.0...v2.4.0) (2026-11-25)
 
 
