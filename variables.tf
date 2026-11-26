@@ -44,7 +44,7 @@ variable "ip_allowlist" {
 variable "docker_compose_runner_image" {
   description = "Docker image for the docker-compose-runner service"
   type        = string
-  default     = "ghcr.io/miquido/gitlab-docker-compose-host:v1.4.2"
+  default     = "ghcr.io/miquido/gitlab-docker-compose-host:v1.5.0"
 }
 
 variable "vm_user" {
